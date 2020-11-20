@@ -43,19 +43,19 @@ router.post("/login/google", requireBearerToken, requireValidGoogleToken, async 
                 // Sinon -> creation du nouvelle utilisateur
                 createNewUser(googleUserInfo.family_name, googleUserInfo.given_name, googleUserInfo.email, googleUserInfo.picture,googleUserInfo.sub)
                     .then((newUser) => {
-                        console.log("[/login/google] Nouvelle utilisateur créé: " + newUser)
+                        console.log("[POST /auth/login/google] Nouvelle utilisateur créé: " + newUser)
                         const token = createToken(newUser._id, jwtAccessTokenMaxAge)
                         res.status(201).json({ jwt: token })
                     })
                     .catch((error) => {
-                        console.error("[/login/google] " + error)
+                        console.error("[POST /auth/login/google] " + error)
                         res.status(500).json({ erreur: "Erreur lors de la création de l'utilisateur"})
                     })
             }
 
         })
         .catch((error) => {
-            console.error("[/login/google] " + error)
+            console.error("[POST /auth/login/google] " + error)
             res.status(500).json({ erreur: "Erreur lors de la création de l'utilisateur"})
         })
 })
