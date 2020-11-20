@@ -3,6 +3,7 @@ const OAuth2GoogleClient = require('google-auth-library').OAuth2Client
 const jwt = require("jsonwebtoken")
 
 const User = require("../models/User")
+const { requireBearerToken } = require("../middlewares/authMiddleware")
 
 
 const googleClient = new OAuth2GoogleClient(process.env.CLIENT_ID)
@@ -26,30 +27,10 @@ const createNewUser = (nom, prenom, email, photoURL, googleID) => {
     }).save()
 }
 
-// récupération du bearer token via le bearerHeader (clef: Authorization ou authorization)
-const getBearerToken = (bearerHeader) => {
-    if (!bearerHeader) {
-        throw "Authorization header introuvable"
-    }
-    const bearer = bearerHeader.split(' ');
-    if (bearer.length !== 2 || bearer[1] === "") {
-        throw "Format du Bearer Token invalide"
-    }
-    return bearer[1]
-}
-
 // routes
-router.post("/login/google", async (req, res) => {
-    // récupération du bearer token (= le token Google)
-    let googleToken
-    try {
-        googleToken = getBearerToken(req.headers.authorization)
-    }
-    catch (error) {
-        console.error("[/login/google] " + error)
-        res.status(400).json({ erreur: error })
-        return
-    }
+router.post("/login/google", requireBearerToken, async (req, res) => {
+    // récupération du bearer token (= le token Google) extrait par le middleware requireBearerToken
+    googleToken = res.locals.bearerToken
 
     // validation du token et récupération des info dans le ticket
     let ticket
