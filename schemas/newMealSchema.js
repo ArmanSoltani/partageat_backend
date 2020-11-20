@@ -31,6 +31,10 @@ module.exports = {
       "description": "Latitude du lieu où aura lieu le repas"
 
     },
+    "intitule": {
+      "type": "string",
+      "description": "Intitulé du repas",
+    },
     "description": {
       "type": "string",
       "description": "description du repas",
@@ -57,5 +61,5 @@ module.exports = {
     }
   },
   "required": ["date", "tarif", "nbPersonnesMax", "coordonneesLong", "coordonneesLat", "description", "photoBase64",
-             "regimes", "allergies"]
+             "regimes", "allergies", "intitule"]
 }
