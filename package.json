@@ -9,6 +9,7 @@
   "author": "Arman Soltani [arman.t.soltani@gmail.com]",
   "license": "ISC",
   "dependencies": {
+    "ajv": "^6.12.6",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "google-auth-library": "^6.1.3",
