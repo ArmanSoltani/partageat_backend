@@ -1,4 +1,7 @@
 const OAuth2GoogleClient = require('google-auth-library').OAuth2Client
+const jwt = require("jsonwebtoken")
+
+const User = require("../models/User")
 
 const googleClient = new OAuth2GoogleClient(process.env.CLIENT_ID)
 
@@ -23,6 +26,7 @@ const requireBearerToken = (req, res, next) => {
     next()
 }
 
+// validation du token google et extraction du ticket
 const requireValidGoogleToken = async (req, res, next) => {
     // récupération du bearer token (= le token Google) extrait par le middleware requireBearerToken
     const googleToken = res.locals.bearerToken
@@ -47,4 +51,30 @@ const requireValidGoogleToken = async (req, res, next) => {
     next()
 }
 
-module.exports = { requireBearerToken, requireValidGoogleToken }
+
+// validation du token JWT de Partag'Eat
+const requireValidAccessToken = (req, res, next) => {
+    // récupération du bearer token extrait par le middleware requireBearerToken
+    const token = res.locals.bearerToken
+
+    // vérification du token
+    jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+        if (err)
+            res.status(400).json({ erreur: "Token JWT invalide" })
+        else {
+            User.findById(decodedToken.id)
+                .then((user) => {
+                    // Si le token est valide on place l'objet User de l'utilisateur dans l'objet res.locals
+                    res.locals.user = user
+                    next()
+                })
+                .catch((error) => {
+                    console.error("[authMiddleware/requireValidAccessToken] " + error)
+                    res.status(500).json({ erreur: "Erreur lors du login"})
+            })
+        }
+    })
+}
+
+
+module.exports = { requireBearerToken, requireValidGoogleToken, requireValidAccessToken }
