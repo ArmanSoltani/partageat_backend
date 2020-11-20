@@ -1,12 +1,8 @@
 const router = require("express").Router()
-const OAuth2GoogleClient = require('google-auth-library').OAuth2Client
 const jwt = require("jsonwebtoken")
 
 const User = require("../models/User")
-const { requireBearerToken } = require("../middlewares/authMiddleware")
-
-
-const googleClient = new OAuth2GoogleClient(process.env.CLIENT_ID)
+const { requireBearerToken, requireValidGoogleToken } = require("../middlewares/authMiddleware")
 
 // Configuration des tokens JWT
 const jwtAccessTokenMaxAge = 60*60*24 // 1 jours
@@ -28,25 +24,10 @@ const createNewUser = (nom, prenom, email, photoURL, googleID) => {
 }
 
 // routes
-router.post("/login/google", requireBearerToken, async (req, res) => {
-    // récupération du bearer token (= le token Google) extrait par le middleware requireBearerToken
-    googleToken = res.locals.bearerToken
-
-    // validation du token et récupération des info dans le ticket
-    let ticket
-    try {
-        ticket = await googleClient.verifyIdToken({
-            idToken: googleToken,
-            audience: process.env.CLIENT_ID
-        });
-    }
-    catch (error) {
-        console.error("[/login/google] " + error)
-        res.status(400).json({ erreur: "Token Google invalide" })
-        return
-    }
-
-    // récupération des info du ticket google
+router.post("/login/google", requireBearerToken, requireValidGoogleToken, async (req, res) => {
+    // récupération des info du ticket google, la récupération du tocket Google
+    // est géré dans les middlewares
+    const ticket = res.locals.ticket
     const googleUserInfo = ticket.getPayload();
 
     // recherche d'un utilisateur avec le même email ou le même googleID

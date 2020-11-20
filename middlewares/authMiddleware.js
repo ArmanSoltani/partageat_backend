@@ -1,3 +1,7 @@
+const OAuth2GoogleClient = require('google-auth-library').OAuth2Client
+
+const googleClient = new OAuth2GoogleClient(process.env.CLIENT_ID)
+
 
 // récupération du bearer token via le bearerHeader (clef: Authorization ou authorization)
 const requireBearerToken = (req, res, next) => {
@@ -19,4 +23,28 @@ const requireBearerToken = (req, res, next) => {
     next()
 }
 
-module.exports = { requireBearerToken }
+const requireValidGoogleToken = async (req, res, next) => {
+    // récupération du bearer token (= le token Google) extrait par le middleware requireBearerToken
+    const googleToken = res.locals.bearerToken
+
+    // validation du token et récupération des info dans le ticket
+    let ticket
+    try {
+        ticket = await googleClient.verifyIdToken({
+            idToken: googleToken,
+            audience: process.env.CLIENT_ID
+        });
+    }
+    catch (error) {
+        console.error("[authMiddleware/requireValidGoogleToken] " + error)
+        res.status(400).json({ erreur: "Token Google invalide" })
+        return
+    }
+
+    // Si le token Google est valid on le place dans l'objet locals de la réponse
+    // et on continue de traiter la requête
+    res.locals.ticket = ticket
+    next()
+}
+
+module.exports = { requireBearerToken, requireValidGoogleToken }
