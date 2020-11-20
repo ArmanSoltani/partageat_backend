@@ -8,16 +8,17 @@ const User = require("../models/User")
 const googleClient = new OAuth2GoogleClient(process.env.CLIENT_ID)
 
 // Configuration des tokens JWT
-const jwtAccessTokenMaxAge = 60*60*24 * 364 // 1 jours
+const jwtAccessTokenMaxAge = 60*60*24 // 1 jours
 const createToken = (id, maxAge) => {
     return jwt.sign({id}, process.env.JWT_SECRET, {expiresIn: maxAge})
 }
 // END Configuration des tokens JWT
 
-const createNewUser = (nom, prenom, photoURL, googleID) => {
+const createNewUser = (nom, prenom, email, photoURL, googleID) => {
     return new User({
         nom: nom,
         prenom: prenom,
+        email: email,
         photoURL: photoURL,
         googleID: googleID,
         repasInscription: [],
@@ -64,13 +65,32 @@ router.post("/login/google", async (req, res) => {
         return
     }
 
-    // Creation du nouvelle utilisateur
+    // récupération des info du ticket google
     const googleUserInfo = ticket.getPayload();
-    createNewUser(googleUserInfo.family_name, googleUserInfo.given_name, googleUserInfo.picture,googleUserInfo.sub)
-        .then((newUser) => {
-            console.log("[/login/google] Nouvelle utilisateur créé: " + newUser)
-            const token = createToken(newUser._id, jwtAccessTokenMaxAge)
-            res.status(201).json({ jwt: token })
+
+    // recherche d'un utilisateur avec le même email ou le même googleID
+    User.findOne().or([{ googleID: googleUserInfo.sub }, { email: googleUserInfo.email }])
+        .then((user) => {
+            if (user) {
+                // Si l'utilisateur existe déjà alors on lui crée un token et roulez jeunesse ~
+                console.log("[/login/google] Login de l'utilisateur: " + user)
+                const token = createToken(user._id, jwtAccessTokenMaxAge)
+                res.status(201).json({ jwt: token })
+            }
+            else {
+                // Sinon -> creation du nouvelle utilisateur
+                createNewUser(googleUserInfo.family_name, googleUserInfo.given_name, googleUserInfo.email, googleUserInfo.picture,googleUserInfo.sub)
+                    .then((newUser) => {
+                        console.log("[/login/google] Nouvelle utilisateur créé: " + newUser)
+                        const token = createToken(newUser._id, jwtAccessTokenMaxAge)
+                        res.status(201).json({ jwt: token })
+                    })
+                    .catch((error) => {
+                        console.error("[/login/google] " + error)
+                        res.status(500).json({ erreur: "Erreur lors de la création de l'utilisateur"})
+                    })
+            }
+
         })
         .catch((error) => {
             console.error("[/login/google] " + error)
