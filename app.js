@@ -1,6 +1,9 @@
 const express = require("express")
 const mongoose = require("mongoose")
 
+const authRoutes = require("./routes/authRoutes")
+
+
 // sur le serveur de prod assigner une valeur à la variable d'environnement PROD
 // afin de ne pas lire le fichier .env (qui n'est pas présent sur ce serveur)
 // voir: https://www.npmjs.com/package/dotenv
@@ -24,3 +27,6 @@ mongoose.connect(process.env.MONGODB_URI,{ useNewUrlParser: true,  useUnifiedTop
 app.get("/", (req, res) => {
     res.send("Hello world !\nYou reached the API of Partag'Eat please use our app instead")
 })
+
+// routes d'authentification
+app.use("/auth", authRoutes)

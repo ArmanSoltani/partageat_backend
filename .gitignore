@@ -1,6 +1,9 @@
 # IDE
 .idea
 
+# Dev JWT tokens
+dev_tokens
+
 # Logs
 logs
 *.log
