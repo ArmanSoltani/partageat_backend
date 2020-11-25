@@ -11,13 +11,13 @@ const requireBearerToken = (req, res, next) => {
     const bearerHeader = req.headers.authorization
     if (!bearerHeader) {
         console.error("[authMiddleware/requireBearerToken] " + "Authorization header introuvable")
-        res.status(400).json({ erreur: "Authorization header introuvable" })
+        res.status(401).json({ erreur: "Authorization header introuvable" })
         return
     }
     const bearer = bearerHeader.split(' ');
     if (bearer.length !== 2 || bearer[1] === "") {
         console.error("[authMiddleware/requireBearerToken] " + "Authorization header introuvable")
-        res.status(400).json({ erreur: "Format du Bearer Token invalide" })
+        res.status(401).json({ erreur: "Format du Bearer Token invalide" })
         return
     }
     // Si le bearer token est trouvé on le place dans l'objet locals de la réponse
@@ -41,7 +41,7 @@ const requireValidGoogleToken = async (req, res, next) => {
     }
     catch (error) {
         console.error("[authMiddleware/requireValidGoogleToken] " + error)
-        res.status(400).json({ erreur: "Token Google invalide" })
+        res.status(401).json({ erreur: "Token Google invalide" })
         return
     }
 
@@ -60,7 +60,7 @@ const requireValidAccessToken = (req, res, next) => {
     // vérification du token
     jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
         if (err)
-            res.status(400).json({ erreur: "Token JWT invalide" })
+            res.status(401).json({ erreur: "Token JWT invalide" })
         else {
             User.findById(decodedToken.id)
                 .then((user) => {
