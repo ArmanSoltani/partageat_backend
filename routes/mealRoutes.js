@@ -1,7 +1,7 @@
 const router = require("express").Router()
 
 const { requireBearerToken, requireValidAccessToken } = require("../middlewares/authMiddleware")
-const { requireValidNewMealData } = require("../middlewares/mealMiddleware")
+const { requireValidNewMealData, requireValidSearchMealData } = require("../middlewares/mealMiddleware")
 const Meal = require("../models/Meal")
 const User = require("../models/User")
 
@@ -36,6 +36,7 @@ router.post("/", requireBearerToken, requireValidAccessToken, requireValidNewMea
         })
 })
 
+// récupérer un repas via un id
 router.get("/:id", requireBearerToken, requireValidAccessToken, async (req, res) => {
     const mealId = req.params.id
 
@@ -90,6 +91,55 @@ router.get("/:id", requireBearerToken, requireValidAccessToken, async (req, res)
     }
 })
 
+// on utilise https://blog.mapbox.com/fast-geodesic-approximations-with-cheap-ruler-106f229ad016 afin de trouver une distance
+// aproximative en km^2 entre 2 points sur une sphere. Présision de quelques dizaines de mêtres
+const getDistanceHaversine = (lat1, lon1, lat2, lon2) => {
+    const meridian = 20004.146
+    const parallelAtEquator = 40074.275
+    const delta_y = meridian * Math.abs(lat1 - lat2) / 180
+    const delta_x = parallelAtEquator * Math.cos((lat1 + lat2) / 2) * Math.abs(lon1 - lon2) / 360
+    return delta_y * delta_y + delta_x * delta_x
+}
+
+// récupérer une liste d'id + coordonnées de repas satisfaisants à un ou plusieurs critères
+router.get("/", requireBearerToken, requireValidAccessToken, requireValidSearchMealData, async (req, res) => {
+    let query = {
+        idCuisinier: { $ne: res.locals.user._id }, // on exclut les repas de l'utilisateur
+    }
+    if (req.query.date)
+        query.date = req.query.date
+    if (req.query.prixMax)
+        query.tarif = { $lte: req.query.prixMax } // on sélectionne uniquement les repas avec: tarif <= prixMax
+    if (req.query.regimes)
+        query.regimes = { $in : req.query.regimes } // tous les régimes spécifiés doivent matcher
+    if (req.query.allergies)
+        query.allergies = { $in : req.query.allergies } // toutes les allergies spécifiée doivent matcher
+
+    try {
+        const meals = await Meal.find(query, ["_id", "coordonneesLong", "coordonneesLat"])
+        console.log(`[GET /repas] résultats pour la query: ${JSON.stringify(req.query)} \n ${meals}`)
+        if (!meals || meals === [])
+            res.status(200).json([])
+        else {
+            let resData = []
+            // filtre selon la distance
+            // il faudra penser à rajouter du bucketing afin d'améliorer les perfs
+            const distanceMaxSquared = req.query.distanceMax * req.query.distanceMax
+            meals.forEach((m) => {
+                const dist = getDistanceHaversine(m.coordonneesLat, m.coordonneesLong, req.query.coordonneesLat, req.query.coordonneesLong)
+                console.log(m.coordonneesLat, m.coordonneesLong, req.query.coordonneesLat, req.query.coordonneesLong)
+                if (dist <= distanceMaxSquared)
+                    resData.push(m)
+            })
+
+            res.status(200).json(resData)
+        }
+    }
+    catch (error) {
+        console.error("[GET /repas] " + error)
+        res.status(500).json({ erreur: "Erreur lors de la recherche de repas"})
+    }
+})
 
 
 module.exports = router;
