@@ -101,7 +101,7 @@ const getDistanceHaversine = (lat1, lon1, lat2, lon2) => {
     return delta_y * delta_y + delta_x * delta_x
 }
 
-// récupérer une liste d'id + coordonnées de repas satisfaisants à un ou plusieurs critères
+// récupérer une liste d'id, coordonnées et distances de repas satisfaisants à un ou plusieurs critères
 router.get("/", requireBearerToken, requireValidAccessToken, requireValidSearchMealData, async (req, res) => {
     let query = {
         idCuisinier: { $ne: res.locals.user._id }, // on exclut les repas de l'utilisateur
@@ -110,24 +110,33 @@ router.get("/", requireBearerToken, requireValidAccessToken, requireValidSearchM
         query.date = req.query.date
     if (req.query.prixMax)
         query.tarif = { $lte: req.query.prixMax } // on sélectionne uniquement les repas avec: tarif <= prixMax
-    if (req.query.regimes)
-        query.regimes = { $in : req.query.regimes } // tous les régimes spécifiés doivent matcher
+    if (req.query.regimes) {
+        query.regimes = { $all : req.query.regimes } // tous les régimes spécifiés doivent matcher
+    }
     if (req.query.allergies)
-        query.allergies = { $in : req.query.allergies } // toutes les allergies spécifiée doivent matcher
+        query.allergies = { $all : req.query.allergies } // toutes les allergies spécifiée doivent matcher
+
+    // pre-filtre selon la distance, on approxime le delta maximal en longitude et lattitude pour que la distance max
+    // soit respectée (voir https://blog.mapbox.com/fast-geodesic-approximations-with-cheap-ruler-106f229ad016)
+    const parallelOneDegSize = 40074.275 * Math.cos(req.query.coordonneesLat) / 360
+    const deltaParallel = req.query.distanceMax / parallelOneDegSize // combien 1 degres de longitude en plus équivaux en km à cette lattitude
+    const meridianOneDegSize = 20004.146 / 180
+    const deltaMeridian = req.query.distanceMax / meridianOneDegSize
+
+    query.coordonneesLong = { $gte: req.query.coordonneesLong - deltaParallel, $lte: req.query.coordonneesLong + deltaParallel}
+    query.coordonneesLat = { $gte: req.query.coordonneesLat - deltaMeridian, $lte: req.query.coordonneesLat + deltaMeridian}
 
     try {
         const meals = await Meal.find(query, ["_id", "coordonneesLong", "coordonneesLat"])
-        console.log(`[GET /repas] résultats pour la query: ${JSON.stringify(req.query)} \n ${meals}`)
+        console.log(`[GET /repas] résultats pour la query: ${JSON.stringify(query)} \n ${meals}`)
         if (!meals || meals === [])
             res.status(200).json([])
         else {
             let resData = []
-            // filtre selon la distance
-            // il faudra penser à rajouter du bucketing afin d'améliorer les perfs
+            // filtre selon la distance "réelle"
             const distanceMaxSquared = req.query.distanceMax * req.query.distanceMax
             meals.forEach((m) => {
                 const dist = getDistanceHaversine(m.coordonneesLat, m.coordonneesLong, req.query.coordonneesLat, req.query.coordonneesLong)
-                console.log(m.coordonneesLat, m.coordonneesLong, req.query.coordonneesLat, req.query.coordonneesLong)
                 if (dist <= distanceMaxSquared)
                     resData.push(m)
             })
