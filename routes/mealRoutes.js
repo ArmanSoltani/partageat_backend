@@ -67,7 +67,7 @@ router.get("/:id", requireBearerToken, requireValidAccessToken, async (req, res)
                             id: cook._id,
                             photoURL: cook.photoURL,
                             email: cook.email,
-                            nom: cook.com,
+                            nom: cook.nom,
                             prenom: cook.prenom
                         }
                     }
