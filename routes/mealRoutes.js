@@ -37,7 +37,7 @@ router.post("/", requireBearerToken, requireValidAccessToken, requireValidNewMea
 })
 
 // récupérer un repas via un id
-router.get("/:id", requireBearerToken, requireValidAccessToken, async (req, res) => {
+router.get("/repas/:id", requireBearerToken, requireValidAccessToken, async (req, res) => {
     const mealId = req.params.id
 
     try {
