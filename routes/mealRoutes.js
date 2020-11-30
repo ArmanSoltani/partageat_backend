@@ -162,4 +162,42 @@ router.get("/", requireBearerToken, requireValidAccessToken, requireValidSearchM
 })
 
 
+// permet à un utilisateur de récupérer la liste de ces repas actifs
+router.get("/mesEvenements", requireBearerToken, requireValidAccessToken, async (req, res) => {
+    const query = {
+        idCuisinier: { $eq: res.locals.user._id }, // l'utilisateur est le cuisinier
+        actif: true // uniquement les repas actifs
+    }
+
+    try {
+        const meals = await Meal.find(query).sort({date: 'asc'})
+        if (!meals || meals === [])
+            res.status(200).json([])
+        else {
+            const resData = meals.map((meal) => {
+                return {
+                    id:                 meal._id,
+                    intitule:           meal.intitule,
+                    photoBase64:        meal.photoBase64,
+                    date:               meal.date,
+                    tarif:              meal.tarif,
+                    description:        meal.description,
+                    nbPersonnesMax:     meal.nbPersonnesMax,
+                    coordonneesLong:    meal.coordonneesLong,
+                    coordonneesLat:     meal.coordonneesLat,
+                    regimes:            meal.regimes,
+                    allergies:          meal.allergies
+                }
+            })
+
+            res.status(200).json(resData)
+        }
+    }
+    catch (error) {
+        console.error("[GET /repas/mesEvenements] " + error)
+        res.status(500).json({ erreur: "Erreur lors de la recherche de repas"})
+    }
+})
+
+
 module.exports = router;
