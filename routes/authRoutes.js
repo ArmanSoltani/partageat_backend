@@ -18,8 +18,7 @@ const createNewUser = (nom, prenom, email, photoURL, googleID) => {
         email: email,
         photoURL: photoURL,
         googleID: googleID,
-        repasInscription: [],
-        repasHote: []
+        repasInscription: []
     }).save()
 }
 
