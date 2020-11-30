@@ -199,5 +199,45 @@ router.get("/mesEvenements", requireBearerToken, requireValidAccessToken, async 
     }
 })
 
+// permet de supprimer un de ses repas
+router.delete("/mesEvenements/:id", requireBearerToken, requireValidAccessToken, async (req, res) => {
+    const mealId = req.params.id
+
+    try {
+        const meal = await Meal.findById(mealId)
+        if (meal) {
+            // On test si l'utilisateur est bien le créateur du repas
+            if (!res.locals.user._id.equals(meal.idCuisinier)) {
+                console.error(`[DELETE repas/mesEvenements/:id] Le repas ${mealId} n'est pas créé par l'utilisateur ${res.locals.user._id} mais par l'utilisteur ${meal.idCuisinier}`)
+                res.status(403).json({ erreur: "action interdite" })
+                return
+            }
+
+            // On test si le repas est toujours actif
+            if (!meal.actif) {
+                console.error(`[DELETE repas/mesEvenements/:id] Le repas ${mealId} n'est plus actif`)
+                res.status(400).json({erreur: "Le repas n'est plus actif"})
+            } else {
+                // modifier le repas
+                meal.actif = false
+                meal.save().then((meal) => {
+                    // modifier les favoris des autres utilisateurs
+
+                    res.status(200).json()
+                })
+            }
+
+        }
+        else {
+            console.error(`[DELETE repas/mesEvenements/:id] Le repas ${mealId} n'existe pas`)
+            res.status(404).json({ erreur: "Le repas n'existe pas" })
+        }
+    }
+    catch (error) {
+        console.error("[DELETE repas/mesEvenements/:id] " + error)
+        res.status(500).json({ erreur: "Erreur lors de la récupération des informations du repas"})
+    }
+})
+
 
 module.exports = router;
