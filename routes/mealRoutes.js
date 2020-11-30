@@ -141,8 +141,15 @@ router.get("/", requireBearerToken, requireValidAccessToken, requireValidSearchM
             const distanceMaxSquared = req.query.distanceMax * req.query.distanceMax
             meals.forEach((m) => {
                 const dist = getDistanceHaversine(m.coordonneesLat, m.coordonneesLong, req.query.coordonneesLat, req.query.coordonneesLong)
-                if (dist <= distanceMaxSquared)
-                    resData.push(m)
+                // si la distance est inférieur à la distanceMax alors on ajoute le repas à la liste des résultats
+                if (dist <= distanceMaxSquared) {
+                    resData.push({
+                        id: m._id,
+                        coordonneesLong: m.coordonneesLong,
+                        coordonneesLat : m.coordonneesLat,
+                        distance: Math.sqrt(dist)
+                    })
+                }
             })
 
             res.status(200).json(resData)
