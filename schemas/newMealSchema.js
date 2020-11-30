@@ -3,10 +3,10 @@ module.exports = {
   "description": "description des propriété nécessaires à la création d'un nouveau repas",
   "type": "object",
   "properties": {
-    "date": {
-      "type": "string",
-      "format": "date-time",
-      "description": "date à laquelle aura lieu le repas"
+    "timestamp": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "timestamp de la date à laquelle aura lieu le repas"
     },
     "tarif": {
       "type": "integer",
@@ -60,6 +60,6 @@ module.exports = {
       "default": []
     }
   },
-  "required": ["date", "tarif", "nbPersonnesMax", "coordonneesLong", "coordonneesLat", "description", "photoBase64",
+  "required": ["timestamp", "tarif", "nbPersonnesMax", "coordonneesLong", "coordonneesLat", "description", "photoBase64",
              "regimes", "allergies", "intitule"]
 }

@@ -19,12 +19,19 @@ const requireValidNewMealData = (req, res, next) => {
         console.error(errors)
         res.status(400).json({ erreurs: errors })
     }
-    else
+    else {
+        // contruction d'un objet Date à partir du timestamp
+        const date = new Date(req.body.timestamp * 1000);
+        req.body.date = date
         next()
+    }
+
 }
 
 // valide les informations permettant de rechercher des repas
 const requireValidSearchMealData = (req, res, next) => {
+    console.log(req.query.date)
+
     // les paramètres get sont toujours des string, il faut donc convertir les nombres au préhalable
     if (req.query.prixMax)
         req.query.prixMax = +req.query.prixMax
@@ -34,6 +41,8 @@ const requireValidSearchMealData = (req, res, next) => {
         req.query.coordonneesLat = +req.query.coordonneesLat
     if (req.query.distanceMax)
         req.query.distanceMax = +req.query.distanceMax
+    if (req.query.timestamp)
+        req.query.timestamp = +req.query.timestamp
 
     const valid = ajv.validate("searchMeal", req.query)
     if (!valid) {
@@ -42,8 +51,14 @@ const requireValidSearchMealData = (req, res, next) => {
         console.error(errors)
         res.status(400).json({ erreurs: errors })
     }
-    else
+    else {
+        if (req.query.timestamp) {
+            // contruction d'un objet Date à partir du timestamp
+            const date = new Date(req.query.timestamp * 1000);
+            req.query.date = date
+        }
         next()
+    }
 }
 
 

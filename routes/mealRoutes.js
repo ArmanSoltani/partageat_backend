@@ -106,8 +106,12 @@ router.get("/", requireBearerToken, requireValidAccessToken, requireValidSearchM
     let query = {
         idCuisinier: { $ne: res.locals.user._id }, // on exclut les repas de l'utilisateur
     }
-    if (req.query.date)
-        query.date = req.query.date
+    if (req.query.date) {
+        console.log(req.query.date.getMonth())
+        const curDayStart = new Date(req.query.date).setHours(0,0,0);
+        const curDatEnd = new Date(req.query.date).setHours(23,59,59);
+        query.date = { "$gte": curDayStart, "$lt": curDatEnd }
+    }
     if (req.query.prixMax)
         query.tarif = { $lte: req.query.prixMax } // on sélectionne uniquement les repas avec: tarif <= prixMax
     if (req.query.regimes) {

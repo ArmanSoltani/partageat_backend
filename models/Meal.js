@@ -5,7 +5,7 @@ const mealSchema = new Schema({
     idCuisinier: String,
     intitule: String,
     photoBase64: String,
-    date: String,
+    date: Date,
     tarif: Number,
     description: String,
     nbPersonnesMax: Number,

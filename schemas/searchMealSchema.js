@@ -3,10 +3,10 @@ module.exports = {
     "description": "ensemble des propriétés permettant de faire une recherche de repas",
     "type": "object",
     "properties": {
-        "date": {
-            "type": "string",
-            "format": "date-time",
-            "description": "date à laquelle aura lieu le repas"
+        "timestamp": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "timestamp de la date à laquelle aura lieu le repas"
         },
         "prixMax": {
             "type": "integer",
