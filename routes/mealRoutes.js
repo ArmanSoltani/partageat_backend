@@ -105,6 +105,7 @@ const getDistanceHaversine = (lat1, lon1, lat2, lon2) => {
 router.get("/", requireBearerToken, requireValidAccessToken, requireValidSearchMealData, async (req, res) => {
     let query = {
         idCuisinier: { $ne: res.locals.user._id }, // on exclut les repas de l'utilisateur
+        actif: true // uniquement les repas actifs
     }
     if (req.query.date) {
         console.log(req.query.date.getMonth())
@@ -132,7 +133,6 @@ router.get("/", requireBearerToken, requireValidAccessToken, requireValidSearchM
 
     try {
         const meals = await Meal.find(query, ["_id", "coordonneesLong", "coordonneesLat"])
-        console.log(`[GET /repas] résultats pour la query: ${JSON.stringify(query)} \n ${meals}`)
         if (!meals || meals === [])
             res.status(200).json([])
         else {
