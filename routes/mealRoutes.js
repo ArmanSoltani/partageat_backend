@@ -4,10 +4,24 @@ const { requireBearerToken, requireValidAccessToken } = require("../middlewares/
 const { requireValidNewMealData, requireValidSearchMealData } = require("../middlewares/mealMiddleware")
 const Meal = require("../models/Meal")
 const User = require("../models/User")
+const Diet = require("../models/Diet")
+const Allergy = require("../models/Allergy")
 
+
+// fonction pemrettant de retirer les régimes invalides (= inexistants dans la db) d'une liste de régime passée en paramètre
+const validateDiets = async (dietsToValidate) => {
+    const diets = await Diet.find({nom: { $in: dietsToValidate }}, ["nom"])
+    return diets.map((diet) => { return diet.nom })
+}
+
+// fonction pemrettant de retirer les allergies invalides (= inexistants dans la db) d'une liste d'allergie passée en paramètre
+const validateAllergies = async (allergiesToValidate) => {
+    const allergies = await Allergy.find({nom: { $in: allergiesToValidate }}, ["nom"])
+    return allergies.map((allergy) => { return allergy.nom })
+}
 
 // routes
-router.post("/", requireBearerToken, requireValidAccessToken, requireValidNewMealData, (req, res) => {
+router.post("/", requireBearerToken, requireValidAccessToken, requireValidNewMealData, async (req, res) => {
     // utilisateur récupéré par le middleware requireValidAccessToken
     const user = res.locals.user
 
@@ -22,8 +36,8 @@ router.post("/", requireBearerToken, requireValidAccessToken, requireValidNewMea
         nbPersonnesMax:     req.body.nbPersonnesMax,
         coordonneesLong:    req.body.coordonneesLong,
         coordonneesLat:     req.body.coordonneesLat,
-        regimes:            req.body.regimes,
-        allergies:          req.body.allergies,
+        regimes:            await validateDiets(req.body.regimes),
+        allergies:          await validateAllergies(req.body.allergies),
         actif:              true
     }).save()
         .then((newMeal) => {
@@ -118,7 +132,7 @@ router.get("/mesEvenements", requireBearerToken, requireValidAccessToken, async 
         if (!meals || meals === [])
             res.status(200).json([])
         else {
-            const resData = meals.map((meal) => {
+            const resData = await Promise.all(meals.map(async (meal) => {
                 return {
                     id:                 meal._id,
                     intitule:           meal.intitule,
@@ -129,10 +143,10 @@ router.get("/mesEvenements", requireBearerToken, requireValidAccessToken, async 
                     nbPersonnesMax:     meal.nbPersonnesMax,
                     coordonneesLong:    meal.coordonneesLong,
                     coordonneesLat:     meal.coordonneesLat,
-                    regimes:            meal.regimes,
-                    allergies:          meal.allergies
+                    regimes:            await validateDiets(meal.regimes),
+                    allergies:          await validateAllergies(meal.allergies)
                 }
-            })
+            }))
 
             res.status(200).json(resData)
         }
@@ -265,7 +279,7 @@ router.get("/mesFavoris", requireBearerToken, requireValidAccessToken, async (re
             let cooksData = {}
             cooks.forEach(cook => { return cooksData[cook._id] = cook })
 
-            const mealData = meals.filter(async (meal) => {
+            const mealData = await Promise.all(meals.filter(async (meal) => {
                 // on filtre les repas dont le cuisinier est introuvable
                 if (!meal.idCuisinier in cooksData) {
                     console.error(`[GET /repas/mesFavoris] Le cuisinier ${meal.idCuisinier} du repas ${mealId} n'existe pas,` +
@@ -273,7 +287,7 @@ router.get("/mesFavoris", requireBearerToken, requireValidAccessToken, async (re
                     return false
                 }
                 return true
-            }).map((meal => {
+            }).map(async meal => {
                 // formatage des données
                 const cook = cooksData[meal.idCuisinier]
                 return {
@@ -286,8 +300,8 @@ router.get("/mesFavoris", requireBearerToken, requireValidAccessToken, async (re
                     nbPersonnesMax:     meal.nbPersonnesMax,
                     coordonneesLong:    meal.coordonneesLong,
                     coordonneesLat:     meal.coordonneesLat,
-                    regimes:            meal.regimes,
-                    allergies:          meal.allergies,
+                    regimes:            await validateDiets(meal.regimes),
+                    allergies:          await validateAllergies(meal.allergies),
                     cuisinier: {
                         id:         cook._id,
                         photoURL:   cook.photoURL,
@@ -333,8 +347,8 @@ router.get("/:id", requireBearerToken, requireValidAccessToken, async (req, res)
                         nbPersonnesMax:     meal.nbPersonnesMax,
                         coordonneesLong:    meal.coordonneesLong,
                         coordonneesLat:     meal.coordonneesLat,
-                        regimes:            meal.regimes,
-                        allergies:          meal.allergies,
+                        regimes:            await validateDiets(meal.regimes),
+                        allergies:          await validateAllergies(meal.allergies),
                         cuisinier: {
                             id:         cook._id,
                             photoURL:   cook.photoURL,
