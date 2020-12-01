@@ -239,5 +239,50 @@ router.delete("/mesEvenements/:id", requireBearerToken, requireValidAccessToken,
     }
 })
 
+// permet d'ajouter un repas dans ses favoris
+router.post("/mesFavoris", requireBearerToken, requireValidAccessToken, async (req, res) => {
+    const mealId = req.body.id
+
+    if (!mealId) {
+        console.error(`[POST repas/mesFavoris] aucune id passé en paramètre de la requête'`)
+        res.status(400).json({erreur: "id introuvable dans le corps de la requête"})
+    }
+
+    try {
+        const meal = await Meal.findById(mealId)
+
+        if (meal) {
+            const user = res.locals.user
+            // On test si le repas n'est pas déjà dans les favoris de l'utilisateur
+            if (user.repasInscription.includes(mealId)) {
+                console.error(`[DELETE repas/mesEvenements/:id] Le repas ${mealId} est déjà dans les favoris de l'utilisateur ${user._id}`)
+                res.status(400).json({erreur: "Le repas est déjà dans les favoris"})
+            }
+            else {
+                // On test si le repas est toujours actif
+                if (!meal.actif) {
+                    console.error(`[DELETE repas/mesEvenements/:id] Le repas ${mealId} n'est plus actif`)
+                    res.status(400).json({erreur: "Le repas n'est plus actif"})
+                } else {
+                    // ici toutes les vérifications sont passées -> on va modifier les information de l'utilisateur afin
+                    // le repas dans ses favoris
+                    user.repasInscription.push(mealId)
+                    user.save().then((meal) => {
+                        res.status(200).json()
+                    })
+                }
+            }
+        }
+        else {
+            console.error(`[POST repas/mesFavoris] Le repas ${mealId} n'existe pas`)
+            res.status(404).json({ erreur: "Le repas n'existe pas" })
+        }
+
+    }
+    catch (error) {
+        console.error("[POST repas/mesFavoris] " + error)
+        res.status(500).json({ erreur: "Erreur lors de la récupération des informations du repas"})
+    }
+})
 
 module.exports = router;
