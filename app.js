@@ -5,6 +5,7 @@ const authRoutes = require("./routes/authRoutes")
 const mealRoutes = require("./routes/mealRoutes")
 const usersRoutes = require("./routes/usersRoutes")
 const dietsRoutes = require("./routes/dietRoutes")
+const allergiesRoutes = require("./routes/allergyRoutes")
 
 
 // sur le serveur de prod assigner une valeur à la variable d'environnement PROD
@@ -42,3 +43,6 @@ app.use("/utilisateurs", usersRoutes)
 
 // routes liées aux régimes
 app.use("/regimesAlimentaires", dietsRoutes)
+
+// routes liées aux allergies et intolerances
+app.use("/allergiesEtIntolerances", allergiesRoutes)
