@@ -108,7 +108,6 @@ router.get("/", requireBearerToken, requireValidAccessToken, requireValidSearchM
         actif: true // uniquement les repas actifs
     }
     if (req.query.date) {
-        console.log(req.query.date.getMonth())
         const curDayStart = new Date(req.query.date).setHours(0,0,0);
         const curDatEnd = new Date(req.query.date).setHours(23,59,59);
         query.date = { "$gte": curDayStart, "$lt": curDatEnd }
@@ -222,8 +221,10 @@ router.delete("/mesEvenements/:id", requireBearerToken, requireValidAccessToken,
                 meal.actif = false
                 meal.save().then((meal) => {
                     // modifier les favoris des autres utilisateurs
-
-                    res.status(200).json()
+                    const query = {repasInscription:  { $in : mealId }} // on cherche les utilisateurs ayant en favoris le repas supprimé
+                    User.updateMany(query, { $pull:  {repasInscription: mealId}  }).then((_) => {
+                        res.status(200).json()
+                    })
                 })
             }
 
