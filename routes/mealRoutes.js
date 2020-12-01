@@ -286,4 +286,22 @@ router.post("/mesFavoris", requireBearerToken, requireValidAccessToken, async (r
     }
 })
 
+// permet de retirer un repas de ses favoris
+router.delete("/mesFavoris/:id", requireBearerToken, requireValidAccessToken, (req, res) => {
+    const user = res.locals.user
+    const mealId = req.params.id
+
+    if (user.repasInscription.includes(mealId)) {
+        user.repasInscription.splice(user.repasInscription.indexOf(mealId), 1);
+        user.save() .then((u) => {
+            res.status(200).json()
+        })
+    }
+    else {
+        console.error(`[DELETE repas/mesFavoris/:id] Le repas ${mealId} n'est pas en favoris de l'utilisateur ${user._id}`)
+        res.status(400).json({erreur: "Le repas n'est pas en favoris"})
+    }
+})
+
+
 module.exports = router;
