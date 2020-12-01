@@ -54,6 +54,7 @@ router.get("/repas/:id", requireBearerToken, requireValidAccessToken, async (req
                     // Si on arrive ici le repas est valide -> on peut envoyer le résultat
                     const mealData = {
                         id:                 meal._id,
+                        intitule:           meal.intitule,
                         photoBase64:        meal.photoBase64,
                         date:               meal.date,
                         tarif:              meal.tarif,
@@ -293,7 +294,7 @@ router.delete("/mesFavoris/:id", requireBearerToken, requireValidAccessToken, (r
 
     if (user.repasInscription.includes(mealId)) {
         user.repasInscription.splice(user.repasInscription.indexOf(mealId), 1);
-        user.save() .then((u) => {
+        user.save().then((u) => {
             res.status(200).json()
         })
     }
@@ -303,5 +304,63 @@ router.delete("/mesFavoris/:id", requireBearerToken, requireValidAccessToken, (r
     }
 })
 
+// permet de récupérer la liste de ses favoris
+router.get("/mesFavoris", requireBearerToken, requireValidAccessToken, async (req, res) => {
+    const user = res.locals.user
+    const idFavorites = user.repasInscription
+
+    if (idFavorites.length === 0)
+        res.status(200).json([])
+    else {
+        const meals = await Meal.find({ _id: { $in: idFavorites }, actif: true }).sort({date: 'asc'})
+        if (meals) {
+            // on récupère le cuisinier de chaque repas
+            const cooksId = meals.map((meal) => { return meal.idCuisinier })
+            const cooks = await User.find({ _id: { $in: cooksId } })
+            // création d'un dictionnaire cuisinierId : cuisinierData
+            let cooksData = {}
+            cooks.forEach(cook => { return cooksData[cook._id] = cook })
+
+            const mealData = meals.filter(async (meal) => {
+                // on filtre les repas dont le cuisinier est introuvable
+                if (!meal.idCuisinier in cooksData) {
+                    console.error(`[GET /repas/mesFavoris] Le cuisinier ${meal.idCuisinier} du repas ${mealId} n'existe pas,` +
+                                  `le repas ne sera pas inclut dans les résultats de la requête`)
+                    return false
+                }
+                return true
+            }).map((meal => {
+                // formatage des données
+                const cook = cooksData[meal.idCuisinier]
+                return {
+                    id:                 meal._id,
+                    intitule:           meal.intitule,
+                    photoBase64:        meal.photoBase64,
+                    date:               meal.date,
+                    tarif:              meal.tarif,
+                    description:        meal.description,
+                    nbPersonnesMax:     meal.nbPersonnesMax,
+                    coordonneesLong:    meal.coordonneesLong,
+                    coordonneesLat:     meal.coordonneesLat,
+                    regimes:            meal.regimes,
+                    allergies:          meal.allergies,
+                    cuisinier: {
+                        id:         cook._id,
+                        photoURL:   cook.photoURL,
+                        email:      cook.email,
+                        nom:        cook.nom,
+                        prenom:     cook.prenom
+                    }
+                }
+            }))
+
+            res.status(200).json(mealData)
+        }
+        else {
+            console.error(`[GET /repas/mesFavoris] Erreur lors de la récupération des favoris de l'utilisateur ${user._id}`)
+            res.status(500).json({ erreur: "Erreur lors de la récupération des favoris" })
+        }
+    }
+})
 
 module.exports = router;
