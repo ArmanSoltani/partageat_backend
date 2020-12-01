@@ -4,6 +4,7 @@ const mongoose = require("mongoose")
 const authRoutes = require("./routes/authRoutes")
 const mealRoutes = require("./routes/mealRoutes")
 const usersRoutes = require("./routes/usersRoutes")
+const dietsRoutes = require("./routes/dietRoutes")
 
 
 // sur le serveur de prod assigner une valeur à la variable d'environnement PROD
@@ -39,3 +40,5 @@ app.use("/repas", mealRoutes)
 // routes liées aux utilisateurs
 app.use("/utilisateurs", usersRoutes)
 
+// routes liées aux régimes
+app.use("/regimesAlimentaires", dietsRoutes)
