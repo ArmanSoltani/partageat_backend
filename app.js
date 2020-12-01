@@ -46,3 +46,6 @@ app.use("/regimesAlimentaires", dietsRoutes)
 
 // routes liées aux allergies et intolerances
 app.use("/allergiesEtIntolerances", allergiesRoutes)
+
+// not found error route
+app.use( (req, res, next) => { res.status(404).json({ error: 'Nothing to see here...' }) });
