@@ -13,18 +13,18 @@ router.post("/", requireBearerToken, requireValidAccessToken, requireValidNewMea
 
     // création du nouveau repas
     new Meal({
-        idCuisinier: user._id,
-        intitule: req.body.intitule,
-        photoBase64: req.body.photoBase64,
-        date: req.body.date,
-        tarif: req.body.tarif,
-        description: req.body.description,
-        nbPersonnesMax: req.body.nbPersonnesMax,
-        coordonneesLong: req.body.coordonneesLong,
-        coordonneesLat: req.body.coordonneesLat,
-        regimes: req.body.regimes,
-        allergies: req.body.allergies,
-        actif: true
+        idCuisinier:        user._id,
+        intitule:           req.body.intitule,
+        photoBase64:        req.body.photoBase64,
+        date:               req.body.date,
+        tarif:              req.body.tarif,
+        description:        req.body.description,
+        nbPersonnesMax:     req.body.nbPersonnesMax,
+        coordonneesLong:    req.body.coordonneesLong,
+        coordonneesLat:     req.body.coordonneesLat,
+        regimes:            req.body.regimes,
+        allergies:          req.body.allergies,
+        actif:              true
     }).save()
         .then((newMeal) => {
             console.log("[POST /repas] Nouveau repas créé: " + newMeal)
@@ -53,22 +53,22 @@ router.get("/repas/:id", requireBearerToken, requireValidAccessToken, async (req
                 if (cook) {
                     // Si on arrive ici le repas est valide -> on peut envoyer le résultat
                     const mealData = {
-                        id: meal._id,
-                        photoBase64: meal.photoBase64,
-                        date: meal.date,
-                        tarif: meal.tarif,
-                        description: meal.description,
-                        nbPersonnesMax: meal.nbPersonnesMax,
-                        coordonneesLong: meal.coordonneesLong,
-                        coordonneesLat: meal.coordonneesLat,
-                        regimes: meal.regimes,
-                        allergies: meal.allergies,
+                        id:                 meal._id,
+                        photoBase64:        meal.photoBase64,
+                        date:               meal.date,
+                        tarif:              meal.tarif,
+                        description:        meal.description,
+                        nbPersonnesMax:     meal.nbPersonnesMax,
+                        coordonneesLong:    meal.coordonneesLong,
+                        coordonneesLat:     meal.coordonneesLat,
+                        regimes:            meal.regimes,
+                        allergies:          meal.allergies,
                         cuisinier: {
-                            id: cook._id,
-                            photoURL: cook.photoURL,
-                            email: cook.email,
-                            nom: cook.nom,
-                            prenom: cook.prenom
+                            id:         cook._id,
+                            photoURL:   cook.photoURL,
+                            email:      cook.email,
+                            nom:        cook.nom,
+                            prenom:     cook.prenom
                         }
                     }
 
@@ -143,10 +143,10 @@ router.get("/", requireBearerToken, requireValidAccessToken, requireValidSearchM
                 // si la distance est inférieur à la distanceMax alors on ajoute le repas à la liste des résultats
                 if (dist <= distanceMaxSquared) {
                     resData.push({
-                        id: m._id,
-                        coordonneesLong: m.coordonneesLong,
-                        coordonneesLat : m.coordonneesLat,
-                        distance: Math.sqrt(dist)
+                        id:                 m._id,
+                        coordonneesLong:    m.coordonneesLong,
+                        coordonneesLat :    m.coordonneesLat,
+                        distance:           Math.sqrt(dist)
                     })
                 }
             })
