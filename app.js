@@ -48,4 +48,4 @@ app.use("/regimesAlimentaires", dietsRoutes)
 app.use("/allergiesEtIntolerances", allergiesRoutes)
 
 // not found error route
-app.use( (req, res, next) => { res.status(404).json({ error: 'Nothing to see here...' }) });
+app.use( (req, res, next) => { res.status(404).json({ erreur: 'Nothing to see here...' }) });

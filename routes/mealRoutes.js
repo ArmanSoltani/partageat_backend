@@ -36,62 +36,6 @@ router.post("/", requireBearerToken, requireValidAccessToken, requireValidNewMea
         })
 })
 
-// récupérer un repas via un id
-router.get("/repas/:id", requireBearerToken, requireValidAccessToken, async (req, res) => {
-    const mealId = req.params.id
-
-    try {
-        const meal = await Meal.findById(mealId)
-        if (meal) {
-            // On test si le repas est toujours actif
-            if (!meal.actif) {
-                console.error(`[repas/:id] Le repas ${mealId} n'est plus actif`)
-                res.status(400).json({ erreur: "Le repas n'est plus actif" })
-            }
-            else {
-                const cook = await User.findById(meal.idCuisinier)
-                if (cook) {
-                    // Si on arrive ici le repas est valide -> on peut envoyer le résultat
-                    const mealData = {
-                        id:                 meal._id,
-                        intitule:           meal.intitule,
-                        photoBase64:        meal.photoBase64,
-                        date:               meal.date,
-                        tarif:              meal.tarif,
-                        description:        meal.description,
-                        nbPersonnesMax:     meal.nbPersonnesMax,
-                        coordonneesLong:    meal.coordonneesLong,
-                        coordonneesLat:     meal.coordonneesLat,
-                        regimes:            meal.regimes,
-                        allergies:          meal.allergies,
-                        cuisinier: {
-                            id:         cook._id,
-                            photoURL:   cook.photoURL,
-                            email:      cook.email,
-                            nom:        cook.nom,
-                            prenom:     cook.prenom
-                        }
-                    }
-
-                    res.status(200).json(mealData)
-
-                } else {
-                    console.error(`[repas/:id] Le cuisinier ${meal.idCuisinier} du repas ${mealId} n'existe pas`)
-                    res.status(404).json({erreur: "Le repas est invalide"})
-                }
-            }
-        }
-        else {
-            console.error(`[repas/:id] Le repas ${mealId} n'existe pas`)
-            res.status(404).json({ erreur: "Le repas n'existe pas" })
-        }
-    }
-    catch (error) {
-        console.error("[repas/:id] " + error)
-        res.status(500).json({ erreur: "Erreur lors de la récupération des informations du repas"})
-    }
-})
-
 // on utilise https://blog.mapbox.com/fast-geodesic-approximations-with-cheap-ruler-106f229ad016 afin de trouver une distance
 // aproximative en km^2 entre 2 points sur une sphere. Présision de quelques dizaines de mêtres
 const getDistanceHaversine = (lat1, lon1, lat2, lon2) => {
@@ -362,5 +306,62 @@ router.get("/mesFavoris", requireBearerToken, requireValidAccessToken, async (re
         }
     }
 })
+
+// récupérer un repas via un id
+router.get("/:id", requireBearerToken, requireValidAccessToken, async (req, res) => {
+    const mealId = req.params.id
+
+    try {
+        const meal = await Meal.findById(mealId)
+        if (meal) {
+            // On test si le repas est toujours actif
+            if (!meal.actif) {
+                console.error(`[repas/:id] Le repas ${mealId} n'est plus actif`)
+                res.status(400).json({ erreur: "Le repas n'est plus actif" })
+            }
+            else {
+                const cook = await User.findById(meal.idCuisinier)
+                if (cook) {
+                    // Si on arrive ici le repas est valide -> on peut envoyer le résultat
+                    const mealData = {
+                        id:                 meal._id,
+                        intitule:           meal.intitule,
+                        photoBase64:        meal.photoBase64,
+                        date:               meal.date,
+                        tarif:              meal.tarif,
+                        description:        meal.description,
+                        nbPersonnesMax:     meal.nbPersonnesMax,
+                        coordonneesLong:    meal.coordonneesLong,
+                        coordonneesLat:     meal.coordonneesLat,
+                        regimes:            meal.regimes,
+                        allergies:          meal.allergies,
+                        cuisinier: {
+                            id:         cook._id,
+                            photoURL:   cook.photoURL,
+                            email:      cook.email,
+                            nom:        cook.nom,
+                            prenom:     cook.prenom
+                        }
+                    }
+
+                    res.status(200).json(mealData)
+
+                } else {
+                    console.error(`[repas/:id] Le cuisinier ${meal.idCuisinier} du repas ${mealId} n'existe pas`)
+                    res.status(404).json({erreur: "Le repas est invalide"})
+                }
+            }
+        }
+        else {
+            console.error(`[repas/:id] Le repas ${mealId} n'existe pas`)
+            res.status(404).json({ erreur: "Le repas n'existe pas" })
+        }
+    }
+    catch (error) {
+        console.error("[repas/:id] " + error)
+        res.status(500).json({ erreur: "Erreur lors de la récupération des informations du repas"})
+    }
+})
+
 
 module.exports = router;
