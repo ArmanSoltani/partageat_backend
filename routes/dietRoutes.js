@@ -1,10 +1,10 @@
 const router = require("express").Router()
 
-const { requireBearerToken, requireValidAccessToken } = require("../middlewares/authMiddleware")
+const { requireBearerToken, requireValidFirebaseToken } = require("../middlewares/authMiddleware")
 const Diet = require("../models/Diet")
 
 // récupérer la liste des régimes
-router.get("/", requireBearerToken, requireValidAccessToken, async (req, res) => {
+router.get("/", requireBearerToken, requireValidFirebaseToken, async (req, res) => {
     try {
         const diets = await Diet.find()
         const dietsData = diets.map(diet => {

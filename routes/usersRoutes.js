@@ -1,11 +1,11 @@
 const router = require("express").Router()
 
-const { requireBearerToken, requireValidAccessToken } = require("../middlewares/authMiddleware")
+const { requireBearerToken, requireValidFirebaseToken } = require("../middlewares/authMiddleware")
 const User = require("../models/User")
 
 
-router.get("/moi", requireBearerToken, requireValidAccessToken, (req, res) => {
-    // utilisateur récupéré par le middleware requireValidAccessToken
+router.get("/moi", requireBearerToken, requireValidFirebaseToken, (req, res) => {
+    // utilisateur récupéré par le middleware requireValidFirebaseToken
     const user = res.locals.user
 
     res.status(200).json({

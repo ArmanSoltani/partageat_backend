@@ -1,10 +1,10 @@
-const OAuth2GoogleClient = require('google-auth-library').OAuth2Client
-const jwt = require("jsonwebtoken")
+const FirebaseAdminClient = require('firebase-admin');
 
 const User = require("../models/User")
 
-const googleClient = new OAuth2GoogleClient(process.env.CLIENT_ID)
-
+const firebase = FirebaseAdminClient.initializeApp({
+    credential: FirebaseAdminClient.credential.applicationDefault(),
+});
 
 // récupération du bearer token via le bearerHeader (clef: Authorization ou authorization)
 const requireBearerToken = (req, res, next) => {
@@ -27,54 +27,72 @@ const requireBearerToken = (req, res, next) => {
 }
 
 // validation du token google et extraction du ticket
-const requireValidGoogleToken = async (req, res, next) => {
+const requireValidFirebaseToken = async (req, res, next) => {
     // récupération du bearer token (= le token Google) extrait par le middleware requireBearerToken
-    const googleToken = res.locals.bearerToken
+    const firebaseIdToken = res.locals.bearerToken
 
-    // validation du token et récupération des info dans le ticket
-    let ticket
-    try {
-        ticket = await googleClient.verifyIdToken({
-            idToken: googleToken,
-            audience: process.env.CLIENT_ID
-        });
-    }
-    catch (error) {
-        console.error("[authMiddleware/requireValidGoogleToken] " + error)
-        res.status(401).json({ erreur: "Token Google invalide" })
-        return
+    const createNewUser = (displayName, email, photoURL, firebaseID) => {
+        return new User({
+            displayName: displayName,
+            email: email,
+            photoURL: photoURL,
+            firebaseID: firebaseID,
+            repasInscription: []
+        }).save()
     }
 
-    // Si le token Google est valid on le place dans l'objet locals de la réponse
-    // et on continue de traiter la requête
-    res.locals.ticket = ticket
-    next()
-}
-
-
-// validation du token JWT de Partag'Eat
-const requireValidAccessToken = (req, res, next) => {
-    // récupération du bearer token extrait par le middleware requireBearerToken
-    const token = res.locals.bearerToken
-
-    // vérification du token
-    jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
-        if (err)
-            res.status(401).json({ erreur: "Token JWT invalide" })
-        else {
-            User.findById(decodedToken.id)
-                .then((user) => {
-                    // Si le token est valide on place l'objet User de l'utilisateur dans l'objet res.locals
+    const createUserIfNotInMongoThenNext = (firebaseUser) => {
+        // recherche d'un utilisateur avec le même email ou le même googleID
+        User.findOne().or([{ firebaseID: firebaseUser.uid }, { email: firebaseUser.email }])
+            .then((user) => {
+                if (!user) {
+                    // Si l'utilisateur n'existe pas on le crée et on le place ensuite dans l'objet res.locals
+                    createNewUser(user.displayName, user.email, user.photoURL, user.uid)
+                        .then((newUser) => {
+                            res.locals.user = user
+                            console.log("L'utilisateur "+ newUser.email + " a bien été créé");
+                            next()
+                        })
+                        .catch((error) => {
+                            console.error("Erreur lors de la création de l'utilisateur :" + error)
+                            return
+                        })
+                } else {
+                    // Si l'utilisateur existe déjà on le place directement dans l'objet res.locals
                     res.locals.user = user
                     next()
+                }
+            })
+            .catch((error) => {
+                console.error("Erreur lors de la recherche de l'utilisateur : " + error)
+                return
+            })
+    }
+
+    // validation du token et récupération des infos dans l'user
+    firebase
+        .auth()
+        .verifyIdToken(firebaseIdToken)
+        .then(async (decodedToken) => {
+            const uid = decodedToken.uid;
+            // Si le token Firebase est valide on le place dans l'objet locals de la réponse
+            // et on continue de traiter la requête
+            firebase.auth().getUser(uid)
+                .then((user) => {
+                    createUserIfNotInMongoThenNext(user);
                 })
                 .catch((error) => {
-                    console.error("[authMiddleware/requireValidAccessToken] " + error)
-                    res.status(500).json({ erreur: "Erreur lors du login"})
-            })
-        }
-    })
+                    console.error("[authMiddleware/requireValidFirebaseToken] " + error)
+                    res.status(401).json({ erreur: "L'utilisateur n'existe pas" })
+                    return
+                })
+        })
+        .catch((error) => {
+            console.error("[authMiddleware/requireValidFirebaseToken] " + error)
+            res.status(401).json({ erreur: "Token Firebase invalide" })
+            return
+        });
 }
 
 
-module.exports = { requireBearerToken, requireValidGoogleToken, requireValidAccessToken }
+module.exports = { requireBearerToken, requireValidFirebaseToken }

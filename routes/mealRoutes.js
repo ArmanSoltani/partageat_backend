@@ -1,6 +1,6 @@
 const router = require("express").Router()
 
-const { requireBearerToken, requireValidAccessToken } = require("../middlewares/authMiddleware")
+const { requireBearerToken, requireValidFirebaseToken } = require("../middlewares/authMiddleware")
 const { requireValidNewMealData, requireValidSearchMealData } = require("../middlewares/mealMiddleware")
 const Meal = require("../models/Meal")
 const User = require("../models/User")
@@ -21,8 +21,8 @@ const validateAllergies = async (allergiesToValidate) => {
 }
 
 // routes
-router.post("/", requireBearerToken, requireValidAccessToken, requireValidNewMealData, async (req, res) => {
-    // utilisateur récupéré par le middleware requireValidAccessToken
+router.post("/", requireBearerToken, requireValidFirebaseToken, requireValidNewMealData, async (req, res) => {
+    // utilisateur récupéré par le middleware requireValidFirebaseToken
     const user = res.locals.user
 
     // création du nouveau repas
@@ -61,7 +61,7 @@ const getDistanceHaversine = (lat1, lon1, lat2, lon2) => {
 }
 
 // récupérer une liste d'id, coordonnées et distances de repas satisfaisants à un ou plusieurs critères
-router.get("/", requireBearerToken, requireValidAccessToken, requireValidSearchMealData, async (req, res) => {
+router.get("/", requireBearerToken, requireValidFirebaseToken, requireValidSearchMealData, async (req, res) => {
     let query = {
         idCuisinier: { $ne: res.locals.user._id }, // on exclut les repas de l'utilisateur
         actif: true // uniquement les repas actifs
@@ -121,7 +121,7 @@ router.get("/", requireBearerToken, requireValidAccessToken, requireValidSearchM
 
 
 // permet à un utilisateur de récupérer la liste de ces repas actifs
-router.get("/mesEvenements", requireBearerToken, requireValidAccessToken, async (req, res) => {
+router.get("/mesEvenements", requireBearerToken, requireValidFirebaseToken, async (req, res) => {
     const query = {
         idCuisinier: { $eq: res.locals.user._id }, // l'utilisateur est le cuisinier
         actif: true // uniquement les repas actifs
@@ -158,7 +158,7 @@ router.get("/mesEvenements", requireBearerToken, requireValidAccessToken, async 
 })
 
 // permet de supprimer un de ses repas
-router.delete("/mesEvenements/:id", requireBearerToken, requireValidAccessToken, async (req, res) => {
+router.delete("/mesEvenements/:id", requireBearerToken, requireValidFirebaseToken, async (req, res) => {
     const mealId = req.params.id
 
     try {
@@ -200,7 +200,7 @@ router.delete("/mesEvenements/:id", requireBearerToken, requireValidAccessToken,
 })
 
 // permet d'ajouter un repas dans ses favoris
-router.post("/mesFavoris", requireBearerToken, requireValidAccessToken, async (req, res) => {
+router.post("/mesFavoris", requireBearerToken, requireValidFirebaseToken, async (req, res) => {
     const mealId = req.body.id
 
     if (!mealId) {
@@ -246,7 +246,7 @@ router.post("/mesFavoris", requireBearerToken, requireValidAccessToken, async (r
 })
 
 // permet de retirer un repas de ses favoris
-router.delete("/mesFavoris/:id", requireBearerToken, requireValidAccessToken, (req, res) => {
+router.delete("/mesFavoris/:id", requireBearerToken, requireValidFirebaseToken, (req, res) => {
     const user = res.locals.user
     const mealId = req.params.id
 
@@ -263,7 +263,7 @@ router.delete("/mesFavoris/:id", requireBearerToken, requireValidAccessToken, (r
 })
 
 // permet de récupérer la liste de ses favoris
-router.get("/mesFavoris", requireBearerToken, requireValidAccessToken, async (req, res) => {
+router.get("/mesFavoris", requireBearerToken, requireValidFirebaseToken, async (req, res) => {
     const user = res.locals.user
     const idFavorites = user.repasInscription
 
@@ -322,7 +322,7 @@ router.get("/mesFavoris", requireBearerToken, requireValidAccessToken, async (re
 })
 
 // récupérer un repas via un id
-router.get("/:id", requireBearerToken, requireValidAccessToken, async (req, res) => {
+router.get("/:id", requireBearerToken, requireValidFirebaseToken, async (req, res) => {
     const mealId = req.params.id
 
     try {

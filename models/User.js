@@ -3,10 +3,9 @@ const Schema = mongoose.Schema
 
 
 const userSchema = new Schema({
-    nom: String,
-    prenom: String,
+    displayName: String,
     photoURL: String,
-    googleID: String,
+    firebaseID: String,
     email: String,
     repasInscription: [String]
 })
