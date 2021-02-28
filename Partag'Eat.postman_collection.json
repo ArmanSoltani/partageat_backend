@@ -1,0 +1,386 @@
+{
+	"info": {
+		"_postman_id": "12ac9475-4673-415a-8616-836bfe87f15b",
+		"name": "Partag'Eat",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "rechercher repas",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmYjdjMTFjNDkwZTI5NTcxYjRiMzUxZCIsImlhdCI6MTYwNTg3ODA0NCwiZXhwIjoxNjM3MzI3NjQ0fQ.kRnV3IS5l3XHF8KdW9HjLUuUQKm7tmIN-gwAifRAhV8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://partageat.herokuapp.com/repas?timestamp=1606842315&prixMax=3&coordonneesLong=45&coordonneesLat=69.68&distanceMax=10&regimes[]=végétairen&regimes[]=végan&allergies[]=gluten",
+					"protocol": "https",
+					"host": [
+						"partageat",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"repas"
+					],
+					"query": [
+						{
+							"key": "timestamp",
+							"value": "1606842315"
+						},
+						{
+							"key": "prixMax",
+							"value": "3"
+						},
+						{
+							"key": "coordonneesLong",
+							"value": "45"
+						},
+						{
+							"key": "coordonneesLat",
+							"value": "69.68"
+						},
+						{
+							"key": "distanceMax",
+							"value": "10"
+						},
+						{
+							"key": "regimes[]",
+							"value": "végétairen"
+						},
+						{
+							"key": "regimes[]",
+							"value": "végan"
+						},
+						{
+							"key": "allergies[]",
+							"value": "gluten"
+						},
+						{
+							"key": "allergies[]",
+							"value": "sansArachide",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get un repas",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmYjdjMTFjNDkwZTI5NTcxYjRiMzUxZCIsImlhdCI6MTYwNTg3ODA0NCwiZXhwIjoxNjM3MzI3NjQ0fQ.kRnV3IS5l3XHF8KdW9HjLUuUQKm7tmIN-gwAifRAhV8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://partageat.herokuapp.com/repas/5fc611a52ec7824f46469f7b",
+					"protocol": "https",
+					"host": [
+						"partageat",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"repas",
+						"5fc611a52ec7824f46469f7b"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ajouter un repas",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmYjdjMTFjNDkwZTI5NTcxYjRiMzUxZCIsImlhdCI6MTYwNTg3ODA0NCwiZXhwIjoxNjM3MzI3NjQ0fQ.kRnV3IS5l3XHF8KdW9HjLUuUQKm7tmIN-gwAifRAhV8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"intitule\": \"Un nouveau repas\",\n    \"timestamp\": 1607015523,\n    \"tarif\": 2,\n    \"description\": \"c'est une description rapide de mon repas\",\n    \"nbPersonnesMax\": 5,\n    \"coordonneesLong\": 2.287592,\n    \"coordonneesLat\": 48.862725,\n    \"regimes\": [\"Halah\"],\n    \"allergies\": []\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://partageat.herokuapp.com/repas",
+					"protocol": "https",
+					"host": [
+						"partageat",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"repas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get mes favoris",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmYjdjMTFjNDkwZTI5NTcxYjRiMzUxZCIsImlhdCI6MTYwNTg3ODA0NCwiZXhwIjoxNjM3MzI3NjQ0fQ.kRnV3IS5l3XHF8KdW9HjLUuUQKm7tmIN-gwAifRAhV8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://partageat.herokuapp.com/repas/mesFavoris",
+					"protocol": "https",
+					"host": [
+						"partageat",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"repas",
+						"mesFavoris"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get mes repas",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmYjdjMTFjNDkwZTI5NTcxYjRiMzUxZCIsImlhdCI6MTYwNTg3ODA0NCwiZXhwIjoxNjM3MzI3NjQ0fQ.kRnV3IS5l3XHF8KdW9HjLUuUQKm7tmIN-gwAifRAhV8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://partageat.herokuapp.com/repas/mesEvenements",
+					"protocol": "https",
+					"host": [
+						"partageat",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"repas",
+						"mesEvenements"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ajouter un repas en favori",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmYjdjMTFjNDkwZTI5NTcxYjRiMzUxZCIsImlhdCI6MTYwNTg3ODA0NCwiZXhwIjoxNjM3MzI3NjQ0fQ.kRnV3IS5l3XHF8KdW9HjLUuUQKm7tmIN-gwAifRAhV8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"5fc91e64c99fcc0017c3342f\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://partageat.herokuapp.com/repas/mesFavoris",
+					"protocol": "https",
+					"host": [
+						"partageat",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"repas",
+						"mesFavoris"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "supprimer un repas de ses favoris",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmYjdjMTFjNDkwZTI5NTcxYjRiMzUxZCIsImlhdCI6MTYwNTg3ODA0NCwiZXhwIjoxNjM3MzI3NjQ0fQ.kRnV3IS5l3XHF8KdW9HjLUuUQKm7tmIN-gwAifRAhV8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://partageat.herokuapp.com/repas/mesFavoris/5fc91e64c99fcc0017c3342f",
+					"protocol": "https",
+					"host": [
+						"partageat",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"repas",
+						"mesFavoris",
+						"5fc91e64c99fcc0017c3342f"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "supprimer un de ses repas",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmYjdjMTFjNDkwZTI5NTcxYjRiMzUxZCIsImlhdCI6MTYwNTg3ODA0NCwiZXhwIjoxNjM3MzI3NjQ0fQ.kRnV3IS5l3XHF8KdW9HjLUuUQKm7tmIN-gwAifRAhV8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://partageat.herokuapp.com/repas/mesEvenements/5fc91e64c99fcc0017c3342f",
+					"protocol": "https",
+					"host": [
+						"partageat",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"repas",
+						"mesEvenements",
+						"5fc91e64c99fcc0017c3342f"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get mes informations utilisateur",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmYjdjMTFjNDkwZTI5NTcxYjRiMzUxZCIsImlhdCI6MTYwNTg3ODA0NCwiZXhwIjoxNjM3MzI3NjQ0fQ.kRnV3IS5l3XHF8KdW9HjLUuUQKm7tmIN-gwAifRAhV8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://partageat.herokuapp.com/utilisateurs/moi",
+					"protocol": "https",
+					"host": [
+						"partageat",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"utilisateurs",
+						"moi"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get la liste des régimes alimentaires",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmYjdjMTFjNDkwZTI5NTcxYjRiMzUxZCIsImlhdCI6MTYwNTg3ODA0NCwiZXhwIjoxNjM3MzI3NjQ0fQ.kRnV3IS5l3XHF8KdW9HjLUuUQKm7tmIN-gwAifRAhV8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://partageat.herokuapp.com/regimesAlimentaires",
+					"protocol": "https",
+					"host": [
+						"partageat",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"regimesAlimentaires"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get la liste des allergies et intolérances",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmYjdjMTFjNDkwZTI5NTcxYjRiMzUxZCIsImlhdCI6MTYwNTg3ODA0NCwiZXhwIjoxNjM3MzI3NjQ0fQ.kRnV3IS5l3XHF8KdW9HjLUuUQKm7tmIN-gwAifRAhV8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://partageat.herokuapp.com/allergiesEtIntolerances",
+					"protocol": "https",
+					"host": [
+						"partageat",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"allergiesEtIntolerances"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "home",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer 123",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://partageat.herokuapp.com",
+					"protocol": "https",
+					"host": [
+						"partageat",
+						"herokuapp",
+						"com"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

@@ -55,7 +55,6 @@ const requireValidFirebaseToken = async (req, res, next) => {
                         })
                         .catch((error) => {
                             console.error("Erreur lors de la création de l'utilisateur :" + error)
-                            return
                         })
                 } else {
                     // Si l'utilisateur existe déjà on le place directement dans l'objet res.locals
@@ -65,7 +64,6 @@ const requireValidFirebaseToken = async (req, res, next) => {
             })
             .catch((error) => {
                 console.error("Erreur lors de la recherche de l'utilisateur : " + error)
-                return
             })
     }
 
@@ -84,13 +82,11 @@ const requireValidFirebaseToken = async (req, res, next) => {
                 .catch((error) => {
                     console.error("[authMiddleware/requireValidFirebaseToken] " + error)
                     res.status(401).json({ erreur: "L'utilisateur n'existe pas" })
-                    return
                 })
         })
         .catch((error) => {
             console.error("[authMiddleware/requireValidFirebaseToken] " + error)
             res.status(401).json({ erreur: "Token Firebase invalide" })
-            return
         });
 }
 

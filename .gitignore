@@ -121,3 +121,4 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+/google-credientials.json

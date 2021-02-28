@@ -31,9 +31,6 @@ app.get("/", (req, res) => {
     res.send("Hello world !\nYou reached the API of Partag'Eat please use our app instead")
 })
 
-// routes d'authentification
-app.use("/auth", authRoutes)
-
 // routes liées aux repas
 app.use("/repas", mealRoutes)
 

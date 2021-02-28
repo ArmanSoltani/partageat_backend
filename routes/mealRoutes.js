@@ -51,7 +51,7 @@ router.post("/", requireBearerToken, requireValidFirebaseToken, requireValidNewM
 })
 
 // on utilise https://blog.mapbox.com/fast-geodesic-approximations-with-cheap-ruler-106f229ad016 afin de trouver une distance
-// aproximative en km^2 entre 2 points sur une sphere. Présision de quelques dizaines de mêtres
+// aproximative en km^2 (afin d'éviter de devoir calculer la racine carré) entre 2 points sur une sphere. Précision de quelques dizaine de mètres.
 const getDistanceHaversine = (lat1, lon1, lat2, lon2) => {
     const meridian = 20004.146
     const parallelAtEquator = 40074.275
@@ -60,13 +60,13 @@ const getDistanceHaversine = (lat1, lon1, lat2, lon2) => {
     return delta_y * delta_y + delta_x * delta_x
 }
 
-// récupérer une liste d'id, coordonnées et distances de repas satisfaisants à un ou plusieurs critères
+// récupérer une liste d'id, coordonnées et distances de repas satisfaisants les critères
 router.get("/", requireBearerToken, requireValidFirebaseToken, requireValidSearchMealData, async (req, res) => {
     let query = {
         idCuisinier: { $ne: res.locals.user._id }, // on exclut les repas de l'utilisateur
         actif: true // uniquement les repas actifs
     }
-    if (req.query.date) {
+    if (req.query.date) { // on sélectionne les repas ayant lieu le jour choisi par l'utilisateur
         const curDayStart = new Date(req.query.date).setHours(0,0,0);
         const curDatEnd = new Date(req.query.date).setHours(23,59,59);
         query.date = { "$gte": curDayStart, "$lt": curDatEnd }
@@ -77,9 +77,9 @@ router.get("/", requireBearerToken, requireValidFirebaseToken, requireValidSearc
         query.regimes = { $all : req.query.regimes } // tous les régimes spécifiés doivent matcher
     }
     if (req.query.allergies)
-        query.allergies = { $all : req.query.allergies } // toutes les allergies spécifiée doivent matcher
+        query.allergies = { $all : req.query.allergies } // toutes les allergies spécifiées doivent matcher
 
-    // pre-filtre selon la distance, on approxime le delta maximal en longitude et lattitude pour que la distance max
+    // pre-filtre selon la distance: on approxime le delta maximal en longitude et lattitude pour que la distance max
     // soit respectée (voir https://blog.mapbox.com/fast-geodesic-approximations-with-cheap-ruler-106f229ad016)
     const parallelOneDegSize = 40074.275 * Math.cos(req.query.coordonneesLat) / 360
     const deltaParallel = req.query.distanceMax / parallelOneDegSize // combien 1 degres de longitude en plus équivaux en km à cette lattitude
@@ -105,7 +105,7 @@ router.get("/", requireBearerToken, requireValidFirebaseToken, requireValidSearc
                         id:                 m._id,
                         coordonneesLong:    m.coordonneesLong,
                         coordonneesLat :    m.coordonneesLat,
-                        distance:           Math.sqrt(dist)
+                        distance:           Math.sqrt(dist) // calcul de la distance en Km uniquement pour les repas sélectionnés
                     })
                 }
             })
@@ -120,7 +120,7 @@ router.get("/", requireBearerToken, requireValidFirebaseToken, requireValidSearc
 })
 
 
-// permet à un utilisateur de récupérer la liste de ces repas actifs
+// permet à un utilisateur de récupérer la liste de ses repas actifs
 router.get("/mesEvenements", requireBearerToken, requireValidFirebaseToken, async (req, res) => {
     const query = {
         idCuisinier: { $eq: res.locals.user._id }, // l'utilisateur est le cuisinier
@@ -180,7 +180,7 @@ router.delete("/mesEvenements/:id", requireBearerToken, requireValidFirebaseToke
                 meal.actif = false
                 meal.save().then((meal) => {
                     // modifier les favoris des autres utilisateurs
-                    const query = {repasInscription:  { $in : mealId }} // on cherche les utilisateurs ayant en favoris le repas supprimé
+                    const query = {repasInscription:  { $in : mealId }} // on cherche les utilisateurs ayant en favori le repas supprimé
                     User.updateMany(query, { $pull:  {repasInscription: mealId}  }).then((_) => {
                         res.status(200).json()
                     })
@@ -225,7 +225,7 @@ router.post("/mesFavoris", requireBearerToken, requireValidFirebaseToken, async 
                     res.status(400).json({erreur: "Le repas n'est plus actif"})
                 } else {
                     // ici toutes les vérifications sont passées -> on va modifier les information de l'utilisateur afin
-                    // le repas dans ses favoris
+                    // d'ajouter le repas dans ses favoris
                     user.repasInscription.push(mealId)
                     user.save().then((meal) => {
                         res.status(200).json()

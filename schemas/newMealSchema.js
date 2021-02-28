@@ -1,6 +1,6 @@
 module.exports = {
   "title": "nouveau repas",
-  "description": "description des propriété nécessaires à la création d'un nouveau repas",
+  "description": "description des propriétés nécessaires à la création d'un nouveau repas",
   "type": "object",
   "properties": {
     "timestamp": {
